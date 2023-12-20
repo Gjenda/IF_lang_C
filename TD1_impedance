@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+void choix_circuit(int composants_choisis, int serie_parallele)
+{
+    printf("Pour choisir votre circuit, choissez d'abord les 2 composant que vous voulez, après la mqniere comment ils sont liées");
+    do {
+        printf("Quels composants voulez-vous ? Mettez 1 pour RC, mettez 2 pour CL ou 3 pour RL");
+        scanf("%d",&composants_choisis);
+    } while(composants_choisis != 1 && composants_choisis != 2 && composants_choisis != 3);
+    do {
+        printf("Quel circuit voulez-vous ? Mettez 1 pour série, 2 pour parallèle");
+        scanf("%d",&serie_parallele);
+    }while(serie_parallele != 1 && serie_parallele != 2);
+}
+void demander_composant(float *pR, float *pC, float *pL, int composants_choisis)
+{
+    switch(composants_choisis)
+    {
+    case 1:
+        printf("Choisir la valeur de la résistance ?");
+        scanf("%f",pR);
+        printf("Choisir la valeur de la capacité ?");
+        scanf("%f",pC);
+        break;
+    case 2:
+        printf("Choisir la valeur de la capacité ?");
+        scanf("%f",pC);
+        printf("Choisir la valeur de l'inductance ?");
+        scanf("%f",pL);
+        break;
+    case 3:
+        printf("Choisir la valeur de la résistance ?");
+        scanf("%f",pR);
+        printf("Choisir la valeur de l'inductance ?");
+        scanf("%f",pL);
+        break;
+    default:
+        printf("Vous n'avez pas répondu correctement aux questions précédentes");
+        break;
+    }
+}
+
+float choisir_frequence(float f_min, float f_max, int nb_points)
+{
+    printf("Choisir la valeur de la fréquence minimale?");
+    scanf("%f",f_min);
+    printf("Choisir la valeur de la fréquence maximale?");
+    scanf("%f",f_max);
+    printf("Choisir la valeur de l'intervalle ? Il doit être supérieur à 0 et inférieur à 1000 et être un entier");
+    scanf("%d",nb_points);
+    float tableau_frequences[1000], pas_tableau = ((f_max - f_min)/nb_points);
+    for (int i = 0 ; i < nb_points ; i++)
+    {
+        tableau_frequences[i] = f_min + i*pas_tableau;
+    }
+    return tableau_frequences;
+
+}
+
+//double calcule_impedance(double* R, double* C, double f)
+
+
+int main()
+{
+    int composants_choisis,serie_parallele, nb_points;
+    float R, C, L, f_min, f_max;
+    demander_composant(R, C, L, composants_choisis);
+    printf("%f",R);
+    return 0;
+}
+
