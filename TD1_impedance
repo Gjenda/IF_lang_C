@@ -2,72 +2,151 @@
 #include <stdlib.h>
 #include <math.h>
 
-void choix_circuit(int composants_choisis, int serie_parallele)
+void choix_circuit(int *p_composants_choisis, int *p_serie_parallele)
 {
-    printf("Pour choisir votre circuit, choissez d'abord les 2 composant que vous voulez, après la mqniere comment ils sont liées");
+    printf("Pour choisir votre circuit, choissez d'abord les 2 composant que vous voulez, après la maniere comment ils sont liées\n");
     do {
-        printf("Quels composants voulez-vous ? Mettez 1 pour RC, mettez 2 pour CL ou 3 pour RL");
-        scanf("%d",&composants_choisis);
-    } while(composants_choisis != 1 && composants_choisis != 2 && composants_choisis != 3);
+        printf("Quels composants voulez-vous ? Mettez 1 pour RC, mettez 2 pour CL ou 3 pour RL\n");
+        scanf("%d",p_composants_choisis);
+    } while(* p_composants_choisis != 1 && * p_composants_choisis != 2 && * p_composants_choisis != 3);
     do {
-        printf("Quel circuit voulez-vous ? Mettez 1 pour série, 2 pour parallèle");
-        scanf("%d",&serie_parallele);
-    }while(serie_parallele != 1 && serie_parallele != 2);
+        printf("Quel circuit voulez-vous ? Mettez 1 pour série, 2 pour parallèle\n");
+        scanf("%d",p_serie_parallele);
+    }while(*p_serie_parallele != 1 && *p_serie_parallele != 2);
 }
-void demander_composant(float *pR, float *pC, float *pL, int composants_choisis)
+void demander_composant(float *pR, float *pC, float *pL, int *p_composants_choisis)
 {
-    switch(composants_choisis)
+    switch(*p_composants_choisis)
     {
     case 1:
-        printf("Choisir la valeur de la résistance ?");
+        printf("Choisir la valeur de la résistance ?\n");
         scanf("%f",pR);
-        printf("Choisir la valeur de la capacité ?");
+        printf("Choisir la valeur de la capacité ?\n");
         scanf("%f",pC);
         break;
     case 2:
-        printf("Choisir la valeur de la capacité ?");
+        printf("Choisir la valeur de la capacité ?\n");
         scanf("%f",pC);
-        printf("Choisir la valeur de l'inductance ?");
+        printf("Choisir la valeur de l'inductance ?\n");
         scanf("%f",pL);
         break;
     case 3:
-        printf("Choisir la valeur de la résistance ?");
+        printf("Choisir la valeur de la résistance ?\n");
         scanf("%f",pR);
-        printf("Choisir la valeur de l'inductance ?");
+        printf("Choisir la valeur de l'inductance ?\n");
         scanf("%f",pL);
         break;
     default:
-        printf("Vous n'avez pas répondu correctement aux questions précédentes");
+        printf("Vous n'avez pas répondu correctement aux questions précédentes\n");
         break;
     }
 }
 
-float choisir_frequence(float f_min, float f_max, int nb_points)
+void choisir_frequence(float *pf_min, float *pf_max, int *pnb_points, float *tableau_frequences)
 {
-    printf("Choisir la valeur de la fréquence minimale?");
-    scanf("%f",f_min);
-    printf("Choisir la valeur de la fréquence maximale?");
-    scanf("%f",f_max);
-    printf("Choisir la valeur de l'intervalle ? Il doit être supérieur à 0 et inférieur à 1000 et être un entier");
-    scanf("%d",nb_points);
-    float tableau_frequences[1000], pas_tableau = ((f_max - f_min)/nb_points);
-    for (int i = 0 ; i < nb_points ; i++)
+    printf("Choisir la valeur de la fréquence minimale?\n");
+    scanf("%f",pf_min);
+    printf("Choisir la valeur de la fréquence maximale?\n");
+    scanf("%f",pf_max);
+    printf("Choisir la valeur de l'intervalle ? Il doit être supérieur à 0 et inférieur à 1000 et être un entier\n");
+    scanf("%d",pnb_points);
+    float pas_tableau = ((*pf_max - *pf_min)/(*pnb_points));
+    for (int i = 0 ; i < (*pnb_points)+1; i++)
     {
-        tableau_frequences[i] = f_min + i*pas_tableau;
+        tableau_frequences[i] = (*pf_min) + i*pas_tableau;
     }
-    return tableau_frequences;
-
 }
 
-//double calcule_impedance(double* R, double* C, double f)
+void calcule_impedance(int *p_serie_parallele, int *p_composants_choisis, float*pC, float*pR, float *pL, float **Z_tableau, float *tableau_frequences)
+{
+    float pi = (float)M_PI;
+    printf("affiche - %f", pi);
+    switch(*p_composants_choisis) {
+    case 1:
+        if (*p_serie_parallele == 1) {
+            for (int i= 0; i<1000; i++) {
+                Z_tableau[0][i] = sqrt(1+pow((*pR)*(*pC)*2*pi*tableau_frequences[i],2)) / ((*pC) * 2*pi*tableau_frequences[i]);  // amplitude du Z pour chaque frequence
+                Z_tableau[1][i] = atan(-1/((*pR)*(*pC)*2*pi*tableau_frequences[i]));
+            }
+        }
+        else {
+            for (int i= 0; i<1000; i++) {
+                Z_tableau[0][i] = *pR/sqrt(1+pow((*pR)*(*pC)*2*pi*tableau_frequences[i],2));  // amplitude du Z pour chaque frequence
+                Z_tableau[1][i] = -atan(((*pR)*(*pC)*2*pi*tableau_frequences[i]));
+                }
+            }
+
+
+    case 2:
+        if (*p_serie_parallele == 1) {
+            for (int i= 0; i<1000; i++) {
+                Z_tableau[0][i] = (*pL) * 2*pi*tableau_frequences[i] - 1/((*pC) * 2*pi*tableau_frequences[i]);
+                Z_tableau[1][i] = pi/2;
+            }
+        }
+        else {
+            for (int i= 0; i<1000; i++) {
+                Z_tableau[0][i] = *pL/((*pC)*(*pR)/sqrt(1+pow((*pR)*(*pC)*2*pi*tableau_frequences[i],2)));  // amplitude du Z pour chaque frequence
+                Z_tableau[1][i] = -pi/2;
+                }
+            }
+
+
+    case 3:
+        if (*p_serie_parallele == 1) {
+            for (int i= 0; i<1000; i++) {
+                Z_tableau[0][i] = sqrt(pow((*pR),2)+pow((*pL)*2*pi*tableau_frequences[i],2)) ;
+                Z_tableau[1][i] = atan((*pL)*2*pi*tableau_frequences[i]/(*pR));
+            }
+        }
+        else {
+            for (int i= 0; i<1000; i++) {
+                Z_tableau[0][i] = (*pR) * (*pL) * 2*pi*tableau_frequences[i] / sqrt(pow((*pR),2)+pow((*pL)*2*pi*tableau_frequences[i],2));
+                Z_tableau[1][i] = pi/2 - atan((*pL)*2*pi*tableau_frequences[i]/(*pR));
+                }
+            }
+
+    }
+}
+
 
 
 int main()
 {
     int composants_choisis,serie_parallele, nb_points;
-    float R, C, L, f_min, f_max;
-    demander_composant(R, C, L, composants_choisis);
-    printf("%f",R);
+    int * p_serie_parallele = &serie_parallele;
+    int * p_composants_choisis = &composants_choisis;
+    int *pnb_points = &nb_points;
+    float R, C, L, f_min, f_max, tableau_frequences[1000];
+    float * pf_min = & f_min;
+    float * pf_max = & f_max;
+    float *pR= &R;
+    float *pL = &L;
+    float *pC = &C;
+
+
+    float Z_tableau[2][1000];
+
+    /*
+     Z_module[1000];
+     Z_phase[1000];
+
+    for (int i=0; i<2; i++){
+        Z_tableau[i] = 0;
+     */
+
+    choix_circuit(p_composants_choisis, p_serie_parallele);
+    demander_composant(pR, pC, pL, p_composants_choisis);
+    choisir_frequence(pf_min, pf_max, pnb_points, tableau_frequences);
+
+    for (int i=0; i<2; i++){
+        for (int j= 0; j<10; j++) {
+            Z_tableau[i][j] = 0;
+        }
+    }
+
+    calcule_impedance(p_serie_parallele,p_composants_choisis,pC, pR, pL, Z_tableau, tableau_frequences);
+
     return 0;
 }
 
